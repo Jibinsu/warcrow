@@ -3,76 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Warcrow - Sÿenann Tracker</title>
+    <title>Warcrow - Sÿenann Data Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Cinzel:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
             --color-bg: #1a1a1a;
-            --color-card: #2c2c2c;
-            --color-card-header: #0d4b3a;
+            --color-pane-bg: #2c2c2c;
+            --color-header-bg: #222;
             --color-border: #00ffaa;
             --color-text: #f0f0f0;
             --color-text-muted: #aaa;
             --color-activated: #555;
+            --color-ready: #28a745;
             --color-button: #00c78a;
             --color-button-hover: #00ffaa;
-            --color-stress: #ffc107;
-            --color-tinge: #9c27b0;
-            --color-wounds: #dc3545;
+
+            /* Unit Type Colors */
+            --color-high-command: #8B0000; /* Dark Red */
+            --color-character: #FF4500;    /* Orange Red */
+            --color-mage: #8A2BE2;         /* Blue Violet */
+            --color-troop: #006400;        /* Dark Green */
+
+            /* Status Colors */
+            --color-wounds: #dc3545; /* Red */
+            --color-stress: #ffc107; /* Amber */
+            --color-tinge: #9c27b0;  /* Purple */
+            --color-morale-normal: #28a745; /* Green */
+            --color-morale-demoralized: #dc3545; /* Red */
         }
 
+        /* --- Global Setup --- */
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Roboto', sans-serif;
             background-color: var(--color-bg);
             color: var(--color-text);
-            padding: 20px;
+            padding: 0;
             margin: 0;
-        }
-
-        h1, h2 {
-            text-align: center;
-            color: var(--color-border);
-            text-shadow: 0 0 5px var(--color-border);
-        }
-
-        /* --- Global Controls --- */
-        .global-controls {
-            background-color: var(--color-card);
-            border-radius: 8px;
-            padding: 15px;
-            margin: 0 auto 20px auto;
-            max-width: 1000px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border: 1px solid var(--color-card-header);
-        }
-
-        .global-controls .control-group {
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
+            overflow: hidden;
         }
-
-        .global-controls label {
-            font-size: 0.9em;
-            color: var(--color-text-muted);
-            margin-bottom: 5px;
+        h1, h2, h3, h4 {
+            font-family: 'Cinzel', serif;
         }
-
-        .global-controls input[type="number"] {
-            width: 60px;
-            text-align: center;
-            font-size: 1.2em;
-        }
-        
-        input[type="number"], select {
-            background-color: var(--color-bg);
-            color: var(--color-text);
-            border: 1px solid var(--color-text-muted);
-            border-radius: 4px;
-            padding: 5px;
-        }
-
         button {
             background-color: var(--color-button);
             color: var(--color-bg);
@@ -82,444 +56,683 @@
             font-weight: bold;
             cursor: pointer;
             transition: all 0.2s ease;
+            text-transform: uppercase;
         }
-
         button:hover {
             background-color: var(--color-button-hover);
             box-shadow: 0 0 10px var(--color-button-hover);
         }
+        input[type="number"], select {
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            border: 1px solid var(--color-text-muted);
+            border-radius: 4px;
+            padding: 5px;
+            text-align: center;
+        }
 
-        /* --- Unit Container --- */
-        .unit-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        /* --- Global Header --- */
+        .global-header {
+            background-color: var(--color-header-bg);
+            padding: 10px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--color-border);
+            flex-shrink: 0;
+        }
+        .global-header h1 {
+            margin: 0;
+            font-size: 1.5em;
+            color: var(--color-border);
+            text-shadow: 0 0 8px var(--color-border);
+        }
+        .global-controls {
+            display: flex;
             gap: 20px;
-            max-width: 1100px;
-            margin: 0 auto;
+            align-items: center;
+        }
+        .global-controls .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .global-controls label {
+            font-size: 0.9em;
+            color: var(--color-text-muted);
+            text-transform: uppercase;
+        }
+        .global-controls input[type="number"] {
+            width: 60px;
+            font-size: 1.2em;
         }
 
-        /* --- Unit Card --- */
-        .unit-card {
-            background-color: var(--color-card);
-            border: 1px solid var(--color-card-header);
-            border-radius: 8px;
+        /* --- Main App Body --- */
+        .app-body {
+            display: flex;
+            flex-grow: 1;
             overflow: hidden;
-            transition: all 0.3s ease;
-            opacity: 1;
         }
 
-        .unit-card.activated {
-            background-color: #222;
+        /* --- Roster Pane (Left) --- */
+        .roster-pane {
+            width: 350px;
+            background-color: var(--color-pane-bg);
+            border-right: 1px solid var(--color-header-bg);
+            flex-shrink: 0;
+            overflow-y: auto;
+        }
+        .roster-pane h2 {
+            margin: 0;
+            padding: 15px;
+            text-align: center;
+            background-color: var(--color-header-bg);
+            font-size: 1.2em;
+        }
+        .roster-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .roster-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--color-header-bg);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background-color 0.2s ease;
+        }
+        .roster-item:hover {
+            background-color: #3a3a3a;
+        }
+        .roster-item.active {
+            background-color: var(--color-button);
+            color: var(--color-bg);
+        }
+        .roster-item .roster-name-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .roster-item .roster-name {
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+        .roster-item .roster-type {
+            font-size: 0.8em;
+            font-style: italic;
             opacity: 0.7;
         }
-
-        .unit-card.activated .card-header {
-            background-color: #444;
+        .activation-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            margin-left: 10px;
         }
+        .activation-dot.ready { background-color: var(--color-ready); }
+        .activation-dot.activated { background-color: var(--color-activated); }
 
+        /* --- Content Pane (Right) --- */
+        .content-pane {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 25px;
+        }
+        .content-pane-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--color-text-muted);
+            font-size: 1.2em;
+        }
+        .unit-card {
+            background-color: var(--color-pane-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #444;
+        }
         .card-header {
-            background-color: var(--color-card-header);
-            padding: 15px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .card-header[data-type="High Command"] { background-color: var(--color-high-command); }
+        .card-header[data-type="Character"] { background-color: var(--color-character); }
+        .card-header[data-type="Mage"] { background-color: var(--color-mage); }
+        .card-header[data-type="Troop"] { background-color: var(--color-troop); }
+
+        .unit-image {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            object-fit: cover;
+            border: 2px solid var(--color-text);
         }
 
         .card-header h3 {
             margin: 0;
-            padding: 0;
+            font-size: 1.8em;
             color: var(--color-text);
         }
-        
         .card-header .unit-name-subtext {
-            font-size: 0.8em;
-            color: var(--color-text-muted);
+            font-size: 0.9em;
+            color: var(--color-text);
             font-style: italic;
+            opacity: 0.8;
+            margin-top: 2px;
         }
 
         .card-body {
-            padding: 15px;
+            padding: 20px;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .tracker {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .tracker label {
-            font-size: 0.9em;
-            color: var(--color-text-muted);
-            margin-bottom: 5px;
+            gap: 20px;
         }
         
-        .tracker .wound-tracker {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
-        .tracker .wound-tracker input {
-            width: 40px;
-            text-align: center;
-        }
-        
-        .tracker label[for*="wounds"] { color: var(--color-wounds); }
-        .tracker label[for*="stress"] { color: var(--color-stress); }
-        .tracker label[for*="tinge"] { color: var(--color-tinge); }
-
-        .card-footer {
+        .tracker-group {
+            grid-column: 1 / -1; /* Span full width */
+            background: #222;
             padding: 15px;
-            background-color: rgba(0,0,0,0.2);
-            display: flex;
-            justify-content: space-between;
+            border-radius: 6px;
+        }
+        .tracker-group h4 {
+            margin: 0 0 10px 0;
+            color: var(--color-wounds);
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+        }
+        .model-tracker-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 10px;
         }
-
-        .ability-content {
-            display: none;
-            padding: 15px;
-            border-top: 1px dashed var(--color-card-header);
+        .model-tracker {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #333;
+            padding: 8px;
+            border-radius: 4px;
         }
+        .model-tracker .model-name {
+            flex-grow: 1;
+            font-size: 0.9em;
+        }
+        .model-tracker input {
+            width: 40px;
+            border-color: var(--color-wounds);
+            color: var(--color-wounds);
+        }
+        .model-tracker .model-max-wounds {
+            color: var(--color-text-muted);
+        }
+
+        .tracker { display: flex; flex-direction: column; gap: 5px; }
+        .tracker label {
+            font-size: 0.8em;
+            color: var(--color-text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .tracker input[type="number"] { width: 60px; font-size: 1.1em; }
+        .tracker select { width: 100%; font-size: 1.1em; }
         
-        .ability-content.visible {
-            display: block;
+        .tracker.stress label, .tracker.stress input { border-color: var(--color-stress); color: var(--color-stress); }
+        .tracker.tinge label, .tracker.tinge input { border-color: var(--color-tinge); color: var(--color-tinge); }
+        .tracker.morale select {
+            border-color: var(--color-morale-normal);
+            color: var(--color-morale-normal);
+        }
+        .tracker.morale select[data-value="demoralized"] {
+            border-color: var(--color-morale-demoralized);
+            color: var(--color-morale-demoralized);
         }
 
+        /* --- Abilities --- */
+        .ability-content {
+            padding: 0 20px 20px 20px;
+        }
         .ability-content h4 {
             color: var(--color-button-hover);
             margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            border-bottom: 1px solid var(--color-header-bg);
+            padding-bottom: 5px;
         }
-        .ability-content ul {
-            padding-left: 20px;
+        .ability-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .ability-tag {
+            background: #222;
+            border: 1px solid #444;
+            border-left: 4px solid var(--color-button-hover);
+            border-radius: 4px;
+            padding: 10px 15px;
+        }
+        .ability-tag h5 {
+            margin: 0 0 5px 0;
+            font-size: 1em;
+            color: var(--color-text);
+        }
+        .ability-tag p {
             margin: 0;
             font-size: 0.9em;
+            color: var(--color-text-muted);
+            line-height: 1.4;
         }
-        .ability-content li {
-            margin-bottom: 8px;
+
+        .card-footer {
+            padding: 15px 20px;
+            background-color: var(--color-header-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
     </style>
 </head>
 <body>
 
-    <h1>Sÿenann Battle Tracker</h1>
+    <header class="global-header">
+        <h1>Sÿenann Data Tracker</h1>
+        <div class="global-controls">
+            <div class="control-group">
+                <label for="turn-counter">Turn</label>
+                <input type="number" id="turn-counter" value="1" min="1">
+            </div>
+            <div class="control-group">
+                <label for="cp-counter">CP</label>
+                <input type="number" id="cp-counter" value="2" min="0">
+            </div>
+            <button id="new-turn-btn">Start New Turn</button>
+        </div>
+    </header>
 
-    <div class="global-controls">
-        <div class="control-group">
-            <label for="turn-counter">Turn</label>
-            <input type="number" id="turn-counter" value="1" min="1">
-        </div>
-        <div class="control-group">
-            <label for="cp-counter">Command Points (CP)</label>
-            <input type="number" id="cp-counter" value="2" min="0">
-        </div>
-        <button id="new-turn-btn">Start New Turn</button>
+    <div class="app-body">
+        <nav class="roster-pane">
+            <h2>Army Roster (250 pts)</h2>
+            <ul class="roster-list" id="roster-list">
+                </ul>
+        </nav>
+
+        <main class="content-pane" id="content-pane">
+            <div class="content-pane-placeholder">
+                <p style="font-size: 3em;">🧝</p>
+                <p>Select a unit from the roster to view its details.</p>
+            </div>
+            </main>
     </div>
-
-    <div class="unit-container" id="unit-container">
-        </div>
 
     <script>
         // --- DATA ---
-        // This object stores the state of your army.
+        let currentSelectedUnitId = null;
         const armyData = [
             {
                 id: 1,
-                name: "Lioslaith Coic Caledhee + Shadows of the Yew",
-                subtext: "[High Command] attached to [Troop]",
-                maxWoundsHero: 5,
-                currentWoundsHero: 5,
-                maxWoundsUnit: 4,
-                currentWoundsUnit: 4,
+                name: "Lioslaith Coic Caledhee",
+                attachedTo: "Shadows of the Yew",
+                type: "High Command",
+                image: "https://warcrow.com/storage/products/thumbnail/LIOSLAITH_COIC_CALEDHEE_01_72.jpg",
+                models: [
+                    { id: 101, name: "Lioslaith", maxWounds: 5, currentWounds: 5 },
+                    { id: 102, name: "Shadow 1", maxWounds: 1, currentWounds: 1 },
+                    { id: 103, name: "Shadow 2", maxWounds: 1, currentWounds: 1 }
+                ],
                 stress: 0,
                 tinge: 0,
                 morale: "normal",
                 isActivated: false,
                 abilities: [
-                    "<strong>Lioslaith - Encircling Defense:</strong> Allied units near a forest/Nemoroso unit ignore 1 damage per activation.",
-                    "<strong>Lioslaith - Scabbard of Nuada (1/game):</strong> When Lioslaith would be killed, ignore damage, heal, and move.",
-                    "<strong>Shadows - Camouflage:</strong> Difficult to hit at range.",
-                    "<strong>Shadows - Silent and Precise:</strong> Shuts down enemy options on a charge.",
-                    "<strong>Shadows - Ranged Attack:</strong> 18-stride range (1R, 3O dice).",
-                    "<strong>Shadows - Melee Attack:</strong> (2R, 1O, 1Y dice)."
+                    { name: "Encircling Defense", desc: "While this unit is within 5 strides of a Forest or Nemoroso unit, friendly units within 5 strides of this one ignore 1 point of Damage per activation." },
+                    { name: "Scabbard of Nuada (Once per game)", desc: "When this unit would be Destroyed, cancel the effects. Lioslaith recovers 3 Wounds and the unit may make a **Displacement** of up to 6 strides." },
+                    { name: "Camouflage (Shadows of the Yew)", desc: "When this unit is the target of a Ranged Attack, the attacker applies a -1 modifier to their roll." },
+                    { name: "Silent and Precise (Shadows of the Yew)", desc: "When this unit performs a Charge, the enemy unit gains the <strong>Disarmed 1</strong> state." }
                 ]
             },
             {
                 id: 2,
                 name: "Alula",
-                subtext: "[Character] (1 CP)",
-                maxWounds: 4,
-                currentWounds: 4,
+                type: "Character",
+                image: "https://warcrow.com/storage/products/thumbnail/ALULA_01_72.jpg",
+                models: [
+                    { id: 201, name: "Alula", maxWounds: 4, currentWounds: 4 }
+                ],
                 stress: 0,
                 tinge: 0,
                 morale: "normal",
                 isActivated: false,
                 abilities: [
-                    "<strong>Surprise Attack:</strong> When a friendly unit within 10 strides is in combat, Alula can join, make an opportunity attack, and inflict <strong>Disarmed</strong>."
+                    { name: "Surprise Attack", desc: "When an enemy unit is in combat with a friendly unit within 10 strides, this unit may be activated to perform an Opportunity Attack against it. The target gains the <strong>Disarmed 1</strong> state." }
                 ]
             },
             {
                 id: 3,
                 name: "Aoidos",
-                subtext: "[Character]",
-                maxWounds: 4,
-                currentWounds: 4,
+                type: "Character",
+                image: "https://warcrow.com/storage/products/thumbnail/AOIDOS_01_72.jpg",
+                models: [
+                    { id: 301, name: "Aoidos", maxWounds: 4, currentWounds: 4 }
+                ],
                 stress: 0,
                 tinge: 0,
                 morale: "normal",
                 isActivated: false,
                 abilities: [
-                    "<strong>Stress Management:</strong> Can remove stress from allies and inflict stress on charging enemies.",
-                    "<strong>Mute:</strong> Can be used to prevent an enemy unit from using a specific ability."
+                    { name: "Soothing Melody", desc: "Action: Remove 2 Stress from a friendly unit within 10 strides." },
+                    { name: "War Cry", desc: "When an enemy unit performs a Charge against this unit, the enemy gains 1 Stress." },
+                    { name: "Mute", desc: "This unit's Melee Attacks gain: 'On a <strong>Switch</strong>, the target cannot use one of its non-innate Abilities (chosen by you) during its next activation.'" }
                 ]
             },
             {
                 id: 4,
                 name: "Druid",
-                subtext: "[Mage]",
-                maxWounds: 4,
-                currentWounds: 4,
+                type: "Mage",
+                image: "https://warcrow.com/storage/products/thumbnail/DRUID_01_72.jpg",
+                models: [
+                    { id: 401, name: "Druid", maxWounds: 4, currentWounds: 4 }
+                ],
                 stress: 0,
                 tinge: 0,
                 morale: "normal",
                 isActivated: false,
                 abilities: [
-                    "<strong>Defenders of the Great Forest:</strong> Spell that allows you to <strong>place a new Forest</strong> terrain piece.",
-                    "<strong>Exalting the Troops:</strong> Buff spell that grants allied units an extra die in melee."
+                    { name: "Spell: Defenders of the Great Forest (2 Tinge)", desc: "Action: **Place** a Forest terrain piece (max 7x7 strides) within 10 strides. It has the Block LoS and Cover (7) traits." },
+                    { name: "Spell: Exalting the Troops (1 Tinge)", desc: "Action: A target Nemoroso allied unit within 10 strides adds 1 Yellow Die to its Melee Attack rolls for 4 Turns." }
                 ]
             },
             {
                 id: 5,
                 name: "Grove Curtailers",
-                subtext: "[Troop] (Unit of 4)",
-                maxWounds: 4,
-                currentWounds: 4,
+                type: "Troop",
+                image: "https://warcrow.com/storage/products/thumbnail/GROVE_CURTAILERS_01_72.jpg",
+                models: [
+                    { id: 501, name: "Model 1", maxWounds: 1, currentWounds: 1 },
+                    { id: 502, name: "Model 2", maxWounds: 1, currentWounds: 1 },
+                    { id: 503, name: "Model 3", maxWounds: 1, currentWounds: 1 },
+                    { id: 504, name: "Model 4", maxWounds: 1, currentWounds: 1 }
+                ],
                 stress: 0,
                 tinge: 0,
                 morale: "normal",
                 isActivated: false,
                 abilities: [
-                    "<strong>Sudden Escape:</strong> Can move away from combat *after* fighting (even if they won) to escape retaliation.",
-                    "<strong>Control:</strong> Can inflict <strong>Disarmed</strong> on enemies near a forest or Nemoroso ally."
+                    { name: "Sudden Escape", desc: "After resolving a Melee Combat, if this unit is within 5 strides of a Forest or Nemoroso unit, it may make a **Displacement** of up to 4 strides." },
+                    { name: "Scout", desc: "This unit can be deployed anywhere on the table, more than 10 strides away from the enemy deployment zone and enemy units." }
                 ]
             },
             {
                 id: 6,
                 name: "Protectors of the Forest (1)",
-                subtext: "[Troop] (Unit of 4)",
-                maxWounds: 4,
-                currentWounds: 4,
+                type: "Troop",
+                image: "https://warcrow.com/storage/products/thumbnail/PROTECTORS_OF_THE_FOREST_01_72.jpg",
+                models: [
+                    { id: 601, name: "Model 1", maxWounds: 1, currentWounds: 1 },
+                    { id: 602, name: "Model 2", maxWounds: 1, currentWounds: 1 },
+                    { id: 603, name: "Model 3", maxWounds: 1, currentWounds: 1 },
+                    { id: 604, name: "Model 4", maxWounds: 1, currentWounds: 1 }
+                ],
                 stress: 0,
                 tinge: 0,
                 morale: "normal",
                 isActivated: false,
                 abilities: [
-                    "<strong>Hit 'n' Run:</strong> After making a ranged attack, can make a free move if near a forest or Nemoroso ally.",
-                    "<strong>Control:</strong> Ranged attacks inflict <strong>Stress</strong> on the target."
+                    { name: "Hit 'n' Run", desc: "After resolving a Ranged Attack, if this unit is within 5 strides of a Forest or Nemoroso unit, it may make a **Displacement** of up to 4 strides." },
+                    { name: "Ranged Attack", desc: "This unit's Ranged Attack gains: 'On a <strong>Switch</strong>, the target gains 1 Stress.'" }
                 ]
             },
             {
                 id: 7,
                 name: "Protectors of the Forest (2)",
-                subtext: "[Troop] (Unit of 4)",
-                maxWounds: 4,
-                currentWounds: 4,
+                type: "Troop",
+                image: "https://warcrow.com/storage/products/thumbnail/PROTECTORS_OF_THE_FOREST_01_72.jpg",
+                models: [
+                    { id: 701, name: "Model 1", maxWounds: 1, currentWounds: 1 },
+                    { id: 702, name: "Model 2", maxWounds: 1, currentWounds: 1 },
+                    { id: 703, name: "Model 3", maxWounds: 1, currentWounds: 1 },
+                    { id: 704, name: "Model 4", maxWounds: 1, currentWounds: 1 }
+                ],
                 stress: 0,
                 tinge: 0,
                 morale: "normal",
                 isActivated: false,
                 abilities: [
-                    "<strong>Hit 'n' Run:</strong> After making a ranged attack, can make a free move if near a forest or Nemoroso ally.",
-                    "<strong>Control:</strong> Ranged attacks inflict <strong>Stress</strong> on the target."
+                    { name: "Hit 'n' Run", desc: "After resolving a Ranged Attack, if this unit is within 5 strides of a Forest or Nemoroso unit, it may make a **Displacement** of up to 4 strides." },
+                    { name: "Ranged Attack", desc: "This unit's Ranged Attack gains: 'On a <strong>Switch</strong>, the target gains 1 Stress.'" }
                 ]
             },
             {
                 id: 8,
                 name: "Sprigs",
-                subtext: "[Troop] (Unit of 4)",
-                maxWounds: 4,
-                currentWounds: 4,
+                type: "Troop",
+                image: "https://warcrow.com/storage/products/thumbnail/SPRIGS_01_72.jpg",
+                models: [
+                    { id: 801, name: "Model 1", maxWounds: 1, currentWounds: 1 },
+                    { id: 802, name: "Model 2", maxWounds: 1, currentWounds: 1 },
+                    { id: 803, name: "Model 3", maxWounds: 1, currentWounds: 1 },
+                    { id: 804, name: "Model 4", maxWounds: 1, currentWounds: 1 }
+                ],
                 stress: 0,
                 tinge: 0,
                 morale: "normal",
                 isActivated: false,
                 abilities: [
-                    "<strong>Exceptional Mobility:</strong> A fast unit for flanking and objectives.",
-                    "<strong>Control:</strong> Has abilities to inflict <strong>Slow</strong> and <strong>Immobilize</strong> on enemy units."
+                    { name: "Entangling Roots", desc: "This unit's Melee Attacks gain: 'On a <strong>Switch</strong>, the target gains the <strong>Slowed 1</strong> state. If it already had it, it gains the <strong>Immobilized 1</strong> state instead.'" }
                 ]
             }
         ];
 
         // --- FUNCTIONS ---
 
-        // This function builds the HTML for all the unit cards
-        function renderBattlefield() {
-            const container = document.getElementById('unit-container');
-            container.innerHTML = ''; // Clear the container
-
+        // Renders the left-hand roster list
+        function renderRoster() {
+            const rosterList = document.getElementById('roster-list');
+            rosterList.innerHTML = '';
+            
             for (const unit of armyData) {
-                // Create the card
-                const card = document.createElement('div');
-                card.className = 'unit-card';
-                card.id = `unit-${unit.id}`;
-                if (unit.isActivated) {
-                    card.classList.add('activated');
+                const item = document.createElement('li');
+                item.className = 'roster-item';
+                item.dataset.id = unit.id;
+                if (unit.id === currentSelectedUnitId) {
+                    item.classList.add('active');
                 }
+                
+                let subtext = unit.type;
+                if (unit.attachedTo) subtext = `(${unit.type} on ${unit.attachedTo})`;
+                
+                item.innerHTML = `
+                    <div class="roster-name-group">
+                        <span class="roster-name">${unit.name}</span>
+                        <span class="roster-type">${subtext}</span>
+                    </div>
+                    <div class="activation-dot ${unit.isActivated ? 'activated' : 'ready'}"></div>
+                `;
+                
+                item.onclick = () => {
+                    currentSelectedUnitId = unit.id;
+                    renderRoster(); // Re-render roster to show active selection
+                    renderContentPane(unit.id); // Render the content
+                };
+                
+                rosterList.appendChild(item);
+            }
+        }
 
-                // --- Build Wound Tracker ---
-                let woundTrackerHTML = '';
-                if (unit.maxWoundsHero) {
-                    // This is the special attached unit
-                    woundTrackerHTML = `
-                        <div class="wound-tracker">
-                            <span>Hero:</span>
-                            <input type="number" id="wounds-hero-${unit.id}" value="${unit.currentWoundsHero}" min="0" max="${unit.maxWoundsHero}" data-id="${unit.id}" data-type="hero">
-                            <span>/ ${unit.maxWoundsHero}</span>
-                        </div>
-                        <div class="wound-tracker">
-                            <span>Unit:</span>
-                            <input type="number" id="wounds-unit-${unit.id}" value="${unit.currentWoundsUnit}" min="0" max="${unit.maxWoundsUnit}" data-id="${unit.id}" data-type="unit">
-                            <span>/ ${unit.maxWoundsUnit}</span>
-                        </div>
-                    `;
-                } else {
-                    // This is a normal unit
-                    woundTrackerHTML = `
-                        <div class="wound-tracker">
-                            <input type="number" id="wounds-${unit.id}" value="${unit.currentWounds}" min="0" max="${unit.maxWounds}" data-id="${unit.id}" data-type="unit">
-                            <span>/</span>
-                            <input type="number" id="wounds-max-${unit.id}" value="${unit.maxWounds}" min="1" data-id="${unit.id}" data-type="max">
-                        </div>
-                    `;
-                }
+        // Renders the right-hand content pane with the selected unit's details
+        function renderContentPane(unitId) {
+            const unit = armyData.find(u => u.id === unitId);
+            if (!unit) {
+                document.getElementById('content-pane').innerHTML = `
+                    <div class="content-pane-placeholder">
+                        <p style="font-size: 3em;">⚠️</p>
+                        <p>Error: Unit not found.</p>
+                    </div>`;
+                return;
+            }
 
-                // --- Build the full card HTML ---
-                card.innerHTML = `
-                    <div class="card-header">
-                        <h3>${unit.name}</h3>
-                        <div class="unit-name-subtext">${unit.subtext}</div>
+            // --- Build Model Wound Tracker HTML ---
+            let modelTrackerHTML = unit.models.map((model, index) => `
+                <div class="model-tracker">
+                    <span class="model-name">${model.name}</span>
+                    <input type="number" class="model-wound-input" value="${model.currentWounds}" min="0" max="${model.maxWounds}" data-unit-id="${unit.id}" data-model-index="${index}">
+                    <span class="model-max-wounds">/ ${model.maxWounds}</span>
+                </div>
+            `).join('');
+
+            // --- Build Abilities HTML ---
+            let abilitiesHTML = unit.abilities.map(ability => `
+                <div class="ability-tag">
+                    <h5>${ability.name}</h5>
+                    <p>${ability.desc}</p>
+                </div>
+            `).join('');
+
+            // --- Build full card HTML ---
+            const contentPane = document.getElementById('content-pane');
+            contentPane.innerHTML = `
+                <div class="unit-card">
+                    <div class="card-header" data-type="${unit.type}">
+                        <img src="${unit.image}" alt="${unit.name}" class="unit-image" onerror="this.style.display='none'">
+                        <div class="unit-details">
+                            <h3>${unit.name}</h3>
+                            <div class="unit-name-subtext">${unit.attachedTo ? `Attached to ${unit.attachedTo}` : unit.type}</div>
+                        </div>
                     </div>
 
                     <div class="card-body">
-                        <div class="tracker">
-                            <label for="wounds-${unit.id}" style="color: var(--color-wounds);">Wounds</label>
-                            ${woundTrackerHTML}
+                        <div class="tracker-group">
+                            <h4>Model Wounds</h4>
+                            <div class="model-tracker-grid">
+                                ${modelTrackerHTML}
+                            </div>
                         </div>
-                        <div class="tracker">
-                            <label for="stress-${unit.id}" style="color: var(--color-stress);">Stress</label>
+                        
+                        <div class="tracker stress">
+                            <label for="stress-${unit.id}">Stress</label>
                             <input type="number" id="stress-${unit.id}" value="${unit.stress}" min="0" data-id="${unit.id}">
                         </div>
-                        <div class="tracker">
-                            <label for="tinge-${unit.id}" style="color: var(--color-tinge);">Tinge</label>
+                        
+                        <div class="tracker tinge">
+                            <label for="tinge-${unit.id}">Tinge</label>
                             <input type="number" id="tinge-${unit.id}" value="${unit.tinge}" min="0" data-id="${unit.id}">
                         </div>
-                        <div class="tracker">
+
+                        <div class="tracker morale">
                             <label for="morale-${unit.id}">Morale</label>
-                            <select id="morale-${unit.id}" data-id="${unit.id}">
+                            <select id="morale-${unit.id}" data-id="${unit.id}" data-value="${unit.morale}">
                                 <option value="normal" ${unit.morale === 'normal' ? 'selected' : ''}>Normal</option>
                                 <option value="demoralized" ${unit.morale === 'demoralized' ? 'selected' : ''}>Demoralized</option>
                             </select>
                         </div>
                     </div>
 
-                    <div class="ability-content" id="ability-content-${unit.id}">
+                    <div class="ability-content">
                         <h4>Key Abilities</h4>
-                        <ul>
-                            ${unit.abilities.map(ability => `<li>${ability}</li>`).join('')}
-                        </ul>
+                        <div class="ability-grid">
+                            ${abilitiesHTML}
+                        </div>
                     </div>
 
                     <div class="card-footer">
                         <button class="activate-btn" data-id="${unit.id}">
-                            ${unit.isActivated ? 'Activated' : 'Activate'}
+                            ${unit.isActivated ? 'Mark as Ready' : 'Mark as Activated'}
                         </button>
-                        <button class="ability-btn" data-id="${unit.id}">View Abilities</button>
                     </div>
-                `;
-                
-                container.appendChild(card);
-            }
+                </div>
+            `;
             
-            // After rendering, attach all the event listeners
-            attachListeners();
+            // Re-attach listeners for the new card content
+            attachCardListeners(unit.id);
+            updateMoraleColor(document.getElementById(`morale-${unit.id}`));
         }
 
-        // --- EVENT LISTENERS ---
-        function attachListeners() {
-            // Activate Buttons
-            document.querySelectorAll('.activate-btn').forEach(btn => {
-                btn.onclick = (e) => {
-                    const id = e.target.dataset.id;
-                    const unit = armyData.find(u => u.id == id);
-                    unit.isActivated = !unit.isActivated;
-                    renderBattlefield(); // Re-draw all cards
+        // Attach listeners just for the card in the content pane
+        function attachCardListeners(unitId) {
+            const unit = armyData.find(u => u.id === unitId);
+
+            // Activate Button
+            document.querySelector('.activate-btn').onclick = (e) => {
+                unit.isActivated = !unit.isActivated;
+                renderRoster(); // Update roster dot
+                renderContentPane(unit.id); // Re-draw card to update button text
+            };
+
+            // Individual Model Wound Trackers
+            document.querySelectorAll('.model-wound-input').forEach(input => {
+                input.onchange = (e) => {
+                    const modelIndex = parseInt(e.target.dataset.modelIndex);
+                    let value = parseInt(e.target.value);
+                    const model = unit.models[modelIndex];
+                    
+                    value = Math.max(0, Math.min(value, model.maxWounds)); // Enforce min/max
+                    model.currentWounds = value;
+                    e.target.value = value;
                 };
             });
-            
-            // Ability Toggle Buttons
-            document.querySelectorAll('.ability-btn').forEach(btn => {
-                btn.onclick = (e) => {
-                    const id = e.target.dataset.id;
-                    const content = document.getElementById(`ability-content-${id}`);
-                    content.classList.toggle('visible');
-                    e.target.textContent = content.classList.contains('visible') ? 'Hide Abilities' : 'View Abilities';
-                };
-            });
-            
+
+            // Stress Tracker
+            document.getElementById(`stress-${unit.id}`).onchange = (e) => {
+                let value = parseInt(e.target.value);
+                value = Math.max(0, value);
+                unit.stress = value;
+                e.target.value = value;
+            };
+
+            // Tinge Tracker
+            document.getElementById(`tinge-${unit.id}`).onchange = (e) => {
+                let value = parseInt(e.target.value);
+                value = Math.max(0, value);
+                unit.tinge = value;
+                e.target.value = value;
+            };
+
+            // Morale Selector
+            const moraleSelect = document.getElementById(`morale-${unit.id}`);
+            moraleSelect.onchange = (e) => {
+                unit.morale = e.target.value;
+                e.target.dataset.value = e.target.value; // Update data-value for CSS
+                updateMoraleColor(e.target);
+            };
+        }
+        
+        // Attach listeners for global controls
+        function attachGlobalListeners() {
             // New Turn Button
             document.getElementById('new-turn-btn').onclick = () => {
                 armyData.forEach(unit => unit.isActivated = false);
-                // Also increment turn counter
                 const turnCounter = document.getElementById('turn-counter');
                 turnCounter.value = parseInt(turnCounter.value) + 1;
-                renderBattlefield();
+                renderRoster();
+                // If a unit is selected, re-render its card to update "Activate" button
+                if (currentSelectedUnitId) {
+                    renderContentPane(currentSelectedUnitId);
+                }
             };
-            
-            // --- Live Data Trackers ---
-            // This is a bit more complex, but it makes the inputs update the data in real-time.
-            // This way, the data is "saved" when you re-render.
-            
-            // Wound Trackers
-            document.querySelectorAll('input[id*="wounds"]').forEach(input => {
-                input.onchange = (e) => {
-                    const id = e.target.dataset.id;
-                    const type = e.target.dataset.type;
-                    const unit = armyData.find(u => u.id == id);
-                    const value = parseInt(e.target.value);
-                    
-                    if(type === 'hero') unit.currentWoundsHero = value;
-                    else if (type === 'unit') unit.currentWounds = value;
-                    else if (type === 'max') unit.maxWounds = value;
-                };
-            });
-            
-            // Stress Trackers
-            document.querySelectorAll('input[id*="stress"]').forEach(input => {
-                input.onchange = (e) => {
-                    const id = e.target.dataset.id;
-                    armyData.find(u => u.id == id).stress = parseInt(e.target.value);
-                };
-            });
-
-            // Tinge Trackers
-            document.querySelectorAll('input[id*="tinge"]').forEach(input => {
-                input.onchange = (e) => {
-                    const id = e.target.dataset.id;
-                    armyData.find(u => u.id == id).tinge = parseInt(e.target.value);
-                };
-            });
-
-            // Morale Selectors
-            document.querySelectorAll('select[id*="morale"]').forEach(select => {
-                select.onchange = (e) => {
-                    const id = e.target.dataset.id;
-                    armyData.find(u => u.id == id).morale = e.target.value;
-                };
-            });
+        }
+        
+        // Helper function to update a single morale select's color
+        function updateMoraleColor(selectElement) {
+            if (!selectElement) return;
+            if (selectElement.value === 'demoralized') {
+                selectElement.style.borderColor = 'var(--color-morale-demoralized)';
+                selectElement.style.color = 'var(--color-morale-demoralized)';
+            } else {
+                selectElement.style.borderColor = 'var(--color-morale-normal)';
+                selectElement.style.color = 'var(--color-morale-normal)';
+            }
         }
 
         // --- INITIALIZE ---
-        // This line runs when the page first loads
-        document.addEventListener('DOMContentLoaded', renderBattlefield);
+        document.addEventListener('DOMContentLoaded', () => {
+            renderRoster();
+            attachGlobalListeners();
+        });
 
     </script>
 </body>
